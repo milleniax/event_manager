@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from .forms import EventForm
 from .models import Event
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from .serializers import EventSerializer
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -12,14 +13,20 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+@login_required
+def dashboard(request):
+    return render(request, 'main/dashboard.html')
+
+@login_required
 def create_event(request):
     if request.method == 'POST':
         form = EventForm(request.POST)
         if form.is_valid():
+            user = request.user
             title = form.cleaned_data['title']
             content = form.cleaned_data['content']
             event_date = form.cleaned_data['event_date']
-            Event.objects.create(title=title, content=content,
+            Event.objects.create(user=user,title=title, content=content,
                                             event_date=event_date)
             
             message = 'Событие успешно создано'
@@ -32,8 +39,9 @@ def create_event(request):
     context = {'form': form}
     return render(request, 'main/create_event.html', context)
 
+@login_required
 def event_list(request):
-    events = Event.objects.all()
+    events = Event.objects.filter(user=request.user)
     context = {'events': events}
     return render(request, 'main/event_list.html', context)
 
@@ -46,7 +54,7 @@ class EventView(APIView):
 
     def post(self, request):
         event = request.data.get('event')
-        print(event)
+        event.user = self.context['view'].request.user
         serializer = EventSerializer(data=event)
         if serializer.is_valid(raise_exception=True):
             event_saved = serializer.save()

@@ -1,11 +1,12 @@
 from rest_framework import serializers
 from .models import Event
+from django.conf import settings
 
 
 class EventSerializer(serializers.Serializer):
     title = serializers.CharField()
     content = serializers.CharField()
-    event_date = serializers.DateField()
+    event_date = serializers.DateTimeField()
 
 
     def create(self, validated_data):
