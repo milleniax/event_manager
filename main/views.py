@@ -54,7 +54,7 @@ class EventView(APIView):
 
     def post(self, request):
         event = request.data.get('event')
-        event.user = self.context['view'].request.user
+        event.user = request.user
         serializer = EventSerializer(data=event)
         if serializer.is_valid(raise_exception=True):
             event_saved = serializer.save()
