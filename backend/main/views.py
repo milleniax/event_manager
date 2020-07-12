@@ -32,7 +32,6 @@ def create_event(request):
             
 
             new_event = form.save()
-            event_send_mail.delay()
             return JsonResponse({'event': model_to_dict(new_event)}, status=200)
     else:
         form = EventForm()
@@ -57,6 +56,8 @@ class EventView(APIView):
         serializer = EventSerializer(data=event)
         if serializer.is_valid(raise_exception=True):
             event_saved = serializer.save()
+        else:
+            logger.error("Сериализатор неккоректен в методе post")
         return Response(serializer.data)
     
     def put(self, request, pk):
@@ -67,7 +68,7 @@ class EventView(APIView):
         if serializer.is_valid(raise_exception=True):
             event_saved = serializer.save()
         else:
-            logger.error("Сериализатор неккоректен")
+            logger.error("Сериализатор неккоректен в методе put")
         return Response({
             "success": "Event '{}' updated successfully".format(event_saved.title)
         })
