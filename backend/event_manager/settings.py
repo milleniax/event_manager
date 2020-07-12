@@ -1,7 +1,7 @@
 import os
 from _datetime import timedelta
 from celery.schedules import crontab
-from config import EMAIL_HOST_PASSWORD, EMAIL_HOST_USER, POSTGRES_DATABASE_PASSWORD,\
+from .config import EMAIL_HOST_PASSWORD, EMAIL_HOST_USER, POSTGRES_DATABASE_PASSWORD,\
                                 POSTGRES_DATABASE_USER, POSTGRES_DATABASE_NAME, SECRET_KEY
 
 
@@ -147,3 +147,5 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
 CORS_ORIGIN_ALLOW_ALL = True
+
+

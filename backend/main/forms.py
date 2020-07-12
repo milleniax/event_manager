@@ -6,4 +6,4 @@ class EventForm(ModelForm):
     """Form for creating event"""
     class Meta:
         model = Event
-        fields = ('title', 'content', 'event_date')
+        fields = ('title', 'content', 'event_date' , 'email')

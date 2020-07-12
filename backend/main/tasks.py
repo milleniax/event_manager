@@ -8,11 +8,9 @@ from celery.task.schedules import crontab
 
 @periodic_task(run_every=(crontab(minute='*')), name="event_send_mail")
 def event_send_mail():
-    print("Событие")
-    events = Event.objects.filter(event_date__range=(datetime.now() + timedelta(minutes=58),datetime.now() + timedelta(minutes=62)))
+    events = Event.objects.filter(event_date__range=(datetime.now() + timedelta(minutes=59),datetime.now() + timedelta(minutes=61)))
     print(events)
     for event in events:
-        print("Lol")
         try:
             send_mail("Напоминание о событии", str(event.title) + "начинаеся через час",
                                      "abdullinmarsel31@gmail.com", ["marsel.abdullin.00@mail.ru",])

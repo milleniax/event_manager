@@ -12,16 +12,13 @@ from django.forms.models import model_to_dict
 from .tasks import event_send_mail
 
 
-
 logger = logging.getLogger(__name__)
-event_send_mail.apply_async(countdown=10)
 
 
-@login_required
+
 def dashboard(request):
     return render(request, 'main/dashboard.html')
 
-@login_required
 def create_event(request):
     if request.method == 'POST':
         form = EventForm(request.POST)
@@ -29,8 +26,9 @@ def create_event(request):
             title = form.cleaned_data['title']
             content = form.cleaned_data['content']
             event_date = form.cleaned_data['event_date']
+            email = form.cleaned_data['email']
             Event.objects.create(title=title, content=content,
-                                            event_date=event_date)
+                                            event_date=event_date, email=email)
             
 
             new_event = form.save()
@@ -42,7 +40,6 @@ def create_event(request):
     context = {'form': form}
     return render(request, 'main/create_event.html', context)
 
-@login_required
 def event_list(request):
     events = Event.objects.all()
     context = {'events': events}
