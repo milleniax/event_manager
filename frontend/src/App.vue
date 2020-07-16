@@ -26,9 +26,9 @@ export default {
 
   },
   async created(){
-     await this.getEvents();       
+     await this.setEvents();       
   },
-  methods: mapActions(['getEvents'])
+  methods: mapActions(['setEvents'])
   
 }
 </script>

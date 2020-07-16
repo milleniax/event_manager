@@ -1,13 +1,13 @@
 <template>
     <div class="d-flex justify-content-between">
-        <select v-model="getSelected"> 
+        <select v-model="selected"> 
             <option value="">Все</option>
             <option value="month">За этот месяц</option>
             <option value="week">За эту неделю</option>
             <option value="day">За этот день</option>
         </select>
         <div>
-            <input type="text" v-model="getSearch" placeholder="Поиск" />
+            <input type="text" v-model="search" placeholder="Поиск" />
         </div>
     </div>
 </template>
@@ -15,9 +15,19 @@
 <script>
 
 
-import { mapGetters } from "vuex"
+import { mapActions } from "vuex"
 
 export default {
-    computed: mapGetters(['getSearch', 'getSelected']),
+    data(){
+        return{
+            search: '',
+            selected: ''
+        }
+    },
+    methods: mapActions(['setSearch', 'setSelected']),
+    async updated(){
+        await this.setSearch(this.search);
+        await this.setSelected(this.selected);
+    }
 }
 </script>

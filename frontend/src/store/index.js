@@ -1,25 +1,26 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import { isMonthEqualNow, isWeekEqualNow, isDayEqualNow } from '@/globalFunctions.js'
 
 
 Vue.use(Vuex);
 
-Date.prototype.getWeek = function () {
-    var onejan = new Date(this.getFullYear(), 0, 1);
-    var today = new Date(this.getFullYear(), this.getMonth(), this.getDate());
-    var dayOfYear = ((today - onejan + 86400000) / 86400000);
-    return Math.ceil(dayOfYear / 7)
-}
 
-export const store = new Vuex.Store({
+export default new Vuex.Store({
     actions: {
-        async getEvents(context) {
+        setSearch(context, search) {
+            context.commit('setSearch', search)
+        },
+        setSelected(context, selected) {
+            context.commit('setSelected', selected)
+        },
+        async setEvents(context) {
             var response = await fetch('http://127.0.0.1:8000/rest/');
             var data = await response.json()
-            context('getEvents', data)
+            context.commit('setEvents', data)
         },
         async createEvent(context) {
-            await this.getEvents();
+            await context.dispatch('setEvents');
             await fetch('http://127.0.0.1:8000/rest/', {
                 method: 'post',
                 headers: {
@@ -27,11 +28,11 @@ export const store = new Vuex.Store({
                 },
                 body: JSON.stringify({ event: context.state.event })
             });
-            await this.getEvents();
+            await context.dispatch('setEvents');
             context.commit('createEvent', context.state.event)
         },
         async editEvent(context) {
-            await this.getEvents();
+            await context.dispatch('setEvents');
             await fetch(`http://127.0.0.1:8000/rest/${context.state.event.id}/`, {
                 method: 'put',
                 headers: {
@@ -39,65 +40,29 @@ export const store = new Vuex.Store({
                 },
                 body: JSON.stringify({ event: context.state.event })
             });
-            await this.getEvents();
+            await context.dispatch('setEvents');
             context.state.event = {};
         },
-        async deleteEvent(context) {
-            await this.getEvents();
-            await fetch(`http://127.0.0.1:8000/rest/${context.state.event.id}/`, {
+        async deleteEvent(context,event) {
+            await context.dispatch('setEvents');
+            await fetch(`http://127.0.0.1:8000/rest/${event.id}/`, {
                 method: 'delete',
                 headers: {
                     'content-type': 'application/json'
                 },
-                body: JSON.stringify({ event: context.state.event })
+                body: JSON.stringify({ event: this.event })
             });
-            await this.getEvents();
+            await context.dispatch('setEvents');
         },
 
 
         submitForm(context) {
             if (context.state.event.id === undefined) {
-                this.createEvent();
+                context.dispatch('createEvent')
             } else {
-                this.editEvent();
+                context.dispatch('editEvent', context.state.event)
             }
         },
-
-
-        isMonthEqualNow(object) {
-            var event_date = new Date(object.event_date)
-            var date_now = new Date()
-            return event_date.getMonth() === date_now.getMonth()
-        },
-        isWeekEqualNow(object) {
-            var event_date = new Date(object.event_date)
-            var date_now = new Date()
-            return event_date.getWeek() === date_now.getWeek()
-        },
-        isDayEqualNow(object) {
-            var event_date = new Date(object.event_date)
-            var date_now = new Date()
-            return event_date.getDate() === date_now.getDate()
-        },
-        eventsByFilters(context) {
-            var events = context.state.events
-            if (context.state.search === '' && context.state.selected) {
-                switch (context.state.selected) {
-                    case 'month':
-                        return events.filter(item => this.isMonthEqualNow(item))
-                    case 'week':
-                        return events.filter(item => this.isMonthEqualNow(item) && this.isWeekEqualNow(item))
-                    case 'day':
-                        return events.filter(item => this.isMonthEqualNow(item) && this.isWeekEqualNow(item)
-                            && this.isDayEqualNow(item))
-                    default:
-                        return events
-                }
-            } else {
-                events.filter(item => item.title.indexOf(context.state.search) !== -1)
-            }
-        }
-
     },
     mutations: {
         setEvents(state,events){
@@ -105,7 +70,16 @@ export const store = new Vuex.Store({
         },
         createEvent(state, event){
             state.events.push(event)
-        }
+        },
+        setEvent(state, event){
+            state.event = event
+        },
+        setSearch(state, search) {
+            state.search = search
+        },
+        setSelected(state,selected) {
+            state.selected = selected
+        },
     },
     state: {
         events: [],
@@ -115,16 +89,25 @@ export const store = new Vuex.Store({
     },
     getters: {
         eventsByFilters(state) {
-            return state.events
-        },
-        getSearch(state){
-            return state.search
-        },
-        getSelected(state){
-            return state.selected
+            var events = state.events
+            if (state.search === '' && state.selected) {
+                switch (state.selected) {
+                    case 'month':
+                        return events.filter(item => isMonthEqualNow(item))
+                    case 'week':
+                        return events.filter(item => isMonthEqualNow(item) && isWeekEqualNow(item))
+                    case 'day':
+                        return events.filter(item => isMonthEqualNow(item) && isWeekEqualNow(item)
+                            && isDayEqualNow(item))
+                    default:
+                        return events
+                }
+            } else {
+                return events.filter(item => item.title.indexOf(state.search) !== -1)
+            }
         },
         getEvent(state) {
             return state.event
-        }
+        },
     },
 });
