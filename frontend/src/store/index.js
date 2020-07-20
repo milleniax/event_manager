@@ -14,6 +14,9 @@ export default new Vuex.Store({
         setSelected(context, selected) {
             context.commit('setSelected', selected)
         },
+        setEvent(context, event){
+            context.commit('setEvent', event)
+        },
         async setEvents(context) {
             var response = await fetch('http://127.0.0.1:8000/rest/');
             var data = await response.json()
@@ -28,7 +31,6 @@ export default new Vuex.Store({
                 },
                 body: JSON.stringify({ event: context.state.event })
             });
-            await context.dispatch('setEvents');
             context.commit('createEvent', context.state.event)
         },
         async editEvent(context) {

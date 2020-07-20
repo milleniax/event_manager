@@ -23,6 +23,6 @@ import { mapGetters, mapActions } from "vuex"
 
 export default {
     computed: mapGetters(['eventsByFilters']),
-    methods: mapActions(['deleteEvent'])
+    methods: mapActions(['deleteEvent', 'setEvent'])
 }
 </script>
